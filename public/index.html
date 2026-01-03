@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medha Technical Crossword</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        .center-card { max-width: 500px; margin: 100px auto; }
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
+        input[type="text"], input[type="password"] {
+            width: 100%; padding: 15px; border: 2px solid #ddd;
+            border-radius: 10px; font-size: 16px; transition: border 0.3s;
+        }
+        input:focus { outline: none; border-color: #667eea; }
+        .btn {
+            width: 100%; padding: 15px; border: none; border-radius: 10px;
+            font-size: 18px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s; margin-top: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .timer-info { text-align: center; color: #666; margin-top: 20px; }
+        .game-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+        }
+        .team-info { font-size: 18px; font-weight: 600; color: #333; }
+        .timer { font-size: 24px; font-weight: bold; color: #333; }
+        .timer.warning { color: #dc3545; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .crossword-container { display: flex; gap: 20px; flex-wrap: wrap; }
+        .grid-wrapper {
+            background: white; padding: 20px; border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .crossword-grid {
+            display: grid; grid-template-columns: repeat(12, 45px);
+            gap: 1px; background: #333; border: 2px solid #333;
+        }
+        .cell {
+            width: 100%; height: 100%; border: 1px solid #ccc;
+            text-align: center; font-size: 18px; font-weight: bold;
+            text-transform: uppercase; background: white;
+        }
+        .cell:focus { outline: 2px solid #667eea; z-index: 10; }
+        .cell.correct { background: #90EE90 !important; }
+        .cell.wrong { background: #ffb3b3 !important; }
+        .block { width: 45px; height: 45px; background: #000; }
+        .cell-wrapper { width: 45px; height: 45px; position: relative; }
+        .clue-number {
+            position: absolute; top: 2px; left: 4px;
+            font-size: 10px; font-weight: bold; color: #4f46e5;
+            z-index: 2; pointer-events: none;
+        }
+        .clues-container { flex: 1; min-width: 300px; }
+        .clues-section {
+            background: white; padding: 20px; border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px;
+        }
+        .clues-section h2 { color: #667eea; margin-bottom: 15px; font-size: 1.5rem; }
+        .clue { padding: 10px; margin-bottom: 8px; border-radius: 8px; transition: background 0.3s; }
+        .clue:hover { background: #f0f0f0; }
+        .clue-num { font-weight: bold; color: #667eea; }
+        .success-screen { text-align: center; padding: 60px 20px; }
+        .success-icon { font-size: 80px; margin-bottom: 20px; }
+        .success-screen h1 { margin-bottom: 20px; }
+        .success-screen p { font-size: 20px; color: #666; margin-bottom: 30px; }
+        .admin-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;
+        }
+        .admin-title { font-size: 2rem; }
+        .btn-group { display: flex; gap: 10px; }
+        .btn-small { padding: 10px 20px; width: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        thead { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        th { padding: 15px; text-align: left; font-weight: 600; }
+        td { padding: 15px; border-bottom: 1px solid #ddd; }
+        tbody tr:hover { background: #f8f9fa; }
+        .rank-cell { font-size: 24px; font-weight: bold; }
+        .badge {
+            display: inline-block; padding: 5px 15px; border-radius: 20px;
+            font-weight: 600; font-size: 14px;
+        }
+        .badge-green { background: #d4edda; color: #155724; }
+        .badge-blue { background: #cce5ff; color: #004085; }
+        .badge-yellow { background: #fff3cd; color: #856404; }
+        .badge-red { background: #f8d7da; color: #721c24; }
+        .loading { text-align: center; padding: 40px; }
+        .spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid #667eea;
+            border-radius: 50%; width: 50px; height: 50px;
+            animation: spin 1s linear infinite; margin: 0 auto 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .hidden { display: none; }
+        .message {
+            padding: 10px; margin: 10px 0; border-radius: 5px;
+            text-align: center; font-weight: bold;
+        }
+        .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .message.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        @media (max-width: 768px) {
+            .crossword-grid { grid-template-columns: repeat(12, 35px); }
+            .cell, .block { width: 35px; height: 35px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HOME PAGE -->
+    <div id="homePage" class="container">
+        <div class="card center-card">
+            <h1>Medha Technical Crossword</h1>
+            <p class="subtitle">Test your programming knowledge!</p>
+            
+            <div class="form-group">
+                <label>👥 Team Name</label>
+                <input type="text" id="teamName" placeholder="Enter team name">
+            </div>
+            
+            <div class="form-group">
+                <label>🏆 Team Number</label>
+                <input type="text" id="teamNo" placeholder="Enter team number">
+            </div>
+            
+            <button class="btn btn-primary" onclick="startPuzzle()">▶️ Start Puzzle</button>
+            <button class="btn btn-secondary" onclick="showPage('adminLogin')">🔒 Admin Login</button>
+            <button class="btn btn-secondary" onclick="testConnection()">🔗 Test Connection</button>
+            
+            <div id="connectionStatus"></div>
+            <div class="timer-info">⏱️ 20 minutes time limit</div>
+        </div>
+    </div>
+
+    <!-- GAME PAGE -->
+    <div id="gamePage" class="container hidden">
+        <div class="card">
+            <h1>Medha Technical Crossword</h1>
+            
+            <div class="game-header">
+                <div class="team-info">
+                    👥 <span id="displayTeamName"></span> (Team #<span id="displayTeamNo"></span>)
+                </div>
+                <div class="timer" id="timer">20:00</div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="submitPuzzle()">Submit Puzzle</button>
+            <button class="btn btn-secondary" onclick="showPage('home')">Back to Home</button>
+            <div id="submitStatus" class="message"></div>
+        </div>
+        
+        <div class="crossword-container">
+            <div class="grid-wrapper">
+                <div class="crossword-grid" id="crosswordGrid"></div>
+            </div>
+            
+            <div class="clues-container">
+                <div class="clues-section">
+                    <h2>➡️ Across</h2>
+                    <div id="acrossClues"></div>
+                </div>
+                
+                <div class="clues-section">
+                    <h2>⬇️ Down</h2>
+                    <div id="downClues"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUCCESS PAGE -->
+    <div id="successPage" class="container hidden">
+        <div class="card center-card success-screen">
+            <div class="success-icon">✅</div>
+            <h1>Submitted Successfully!</h1>
+            <p>Thank you, <strong id="successTeamName"></strong>!</p>
+            <p id="successMessage">Your answers have been recorded. Results will be announced by the admin.</p>
+            <button class="btn btn-primary" onclick="showPage('home')">Back to Home</button>
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN PAGE -->
+    <div id="adminLoginPage" class="container hidden">
+        <div class="card center-card">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 48px; margin-bottom: 15px;">🔒</div>
+                <h1>Admin Login</h1>
+                <p class="subtitle">Enter credentials to view results</p>
+            </div>
+            
+            <div id="loginMessage"></div>
+            
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="adminUsername" placeholder="Enter username" value="admin">
+            </div>
+            
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="adminPassword" placeholder="Enter password" value="medha2025">
+            </div>
+            
+            <button class="btn btn-primary" onclick="adminLogin()">Login</button>
+            <button class="btn btn-secondary" onclick="showPage('home')">Back to Home</button>
+        </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD PAGE -->
+    <div id="adminDashboard" class="container hidden">
+        <div class="card">
+            <div class="admin-header">
+                <div>
+                    <h1 class="admin-title">🏆 Admin Dashboard</h1>
+                    <p class="subtitle">All team results (sorted by highest score)</p>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary btn-small" onclick="loadResults()">🔄 Refresh</button>
+                    <button class="btn btn-secondary btn-small" onclick="showPage('home')">🏠 Home</button>
+                    <button class="btn btn-secondary btn-small" onclick="adminLogout()">🚪 Logout</button>
+                </div>
+            </div>
+            
+            <div id="adminMessage"></div>
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const API_BASE_URL = window.location.origin.includes('localhost') 
+            ? 'http://localhost:3000/api' 
+            : '/api';
+        
+        // Puzzle data
+        const grid = [
+            ["F","I","R","E","W","A","L","L","#","O","#","#"],
+            ["I","#","#","#","#","#","E","#","S","S","D","#"],
+            ["L","#","S","T","R","I","N","G","#","#","I","P"],
+            ["E","#","T","#","#","#","G","#","L","#","S","#"],
+            ["#","#","A","#","N","E","T","W","O","R","K","#"],
+            ["#","#","C","#","U","#","H","#","O","#","#","#"],
+            ["#","#","K","#","L","#","#","C","P","U","#","R"],
+            ["#","C","#","#","L","A","N","#","#","#","#","E"],
+            ["R","A","M","#","#","R","#","#","#","B","I","T"],
+            ["#","C","#","T","H","R","E","A","D","#","#","U"],
+            ["#","H","#","#","#","A","#","L","#","#","#","R"],
+            ["M","E","M","O","R","Y","#","U","N","I","O","N"]
+        ];
+
+        const wordAnswers = [
+            {r:0,c:0,d:"A",a:"FIREWALL"}, {r:1,c:8,d:"A",a:"SSD"}, {r:2,c:2,d:"A",a:"STRING"},
+            {r:2,c:10,d:"A",a:"IP"}, {r:4,c:4,d:"A",a:"NETWORK"}, {r:6,c:7,d:"A",a:"CPU"},
+            {r:7,c:4,d:"A",a:"LAN"}, {r:8,c:0,d:"A",a:"RAM"}, {r:8,c:9,d:"A",a:"BIT"},
+            {r:9,c:3,d:"A",a:"THREAD"}, {r:11,c:0,d:"A",a:"MEMORY"}, {r:11,c:7,d:"A",a:"UNION"},
+            {r:0,c:0,d:"D",a:"FILE"}, {r:7,c:1,d:"D",a:"CACHE"}, {r:2,c:2,d:"D",a:"STACK"},
+            {r:4,c:4,d:"D",a:"NULL"}, {r:7,c:5,d:"D",a:"ARRAY"}, {r:0,c:6,d:"D",a:"LENGTH"},
+            {r:9,c:7,d:"D",a:"ALU"}, {r:3,c:8,d:"D",a:"LOOP"}, {r:0,c:9,d:"D",a:"OS"},
+            {r:1,c:10,d:"D",a:"DISK"}, {r:6,c:11,d:"D",a:"RETURN"}
+        ];
+
+        const clues = {
+            across: [
+                { num: 1, clue: "A network security system" },
+                { num: 4, clue: "A modern storage device" },
+                { num: 6, clue: "A sequence of characters in C" },
+                { num: 7, clue: "Internet Protocol, for short" },
+                { num: 9, clue: "Connected computers" },
+                { num: 10, clue: "The brain of the computer" },
+                { num: 13, clue: "Local Area Network, for short" },
+                { num: 15, clue: "Volatile computer memory" },
+                { num: 16, clue: "Smallest unit of data" },
+                { num: 17, clue: "A part of a process" },
+                { num: 19, clue: "Where data is stored in a computer" },
+                { num: 20, clue: "A special data type in C" }
+            ],
+            down: [
+                { num: 1, clue: "Used for data storage and retrieval" },
+                { num: 2, clue: "The number of elements in a string" },
+                { num: 3, clue: "Software that manages computer hardware" },
+                { num: 5, clue: "Storage device, as in Hard ___" },
+                { num: 6, clue: "A region of memory for local variables" },
+                { num: 8, clue: "A control flow statement in C programming" },
+                { num: 9, clue: "A pointer that points to nothing" },
+                { num: 11, clue: "Statement to exit a function" },
+                { num: 12, clue: "Fast memory for quick data access" },
+                { num: 14, clue: "A collection of elements of the same type" },
+                { num: 18, clue: "Performs arithmetic and logic operations" }
+            ]
+        };
+
+        // Global variables
+        let timeLeft = 20 * 60;
+        let timerInterval = null;
+        let teamName = '';
+        let teamNo = '';
+        let userAnswers = {};
+        let startTime = null;
+        let localStorageBackup = JSON.parse(localStorage.getItem('crosswordResults') || '[]');
+
+        // ========== UTILITY FUNCTIONS ==========
+        function showPage(page) {
+            ['homePage', 'gamePage', 'successPage', 'adminLoginPage', 'adminDashboard']
+                .forEach(id => document.getElementById(id).classList.add('hidden'));
+            
+            document.getElementById(page + 'Page').classList.remove('hidden');
+            
+            if (page === 'game') {
+                startTime = Date.now();
+                console.log('Game started at:', new Date(startTime).toLocaleTimeString());
+            }
+        }
+
+        function showMessage(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = `<div class="message ${type}">${message}</div>`;
+                setTimeout(() => element.innerHTML = '', 5000);
+            }
+        }
+
+        // ========== CONNECTION TEST ==========
+        async function testConnection() {
+            const statusEl = document.getElementById('connectionStatus');
+            statusEl.innerHTML = '<div class="message info">Testing connection...</div>';
+            
+            try {
+                console.log('Testing API at:', API_BASE_URL + '/test');
+                const response = await fetch(API_BASE_URL + '/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ test: true, time: new Date().toISOString() })
+                });
+                
+                const data = await response.json();
+                console.log('Connection test response:', data);
+                
+                if (data.success) {
+                    statusEl.innerHTML = `<div class="message success">✅ API Connected! ${data.message}</div>`;
+                } else {
+                    statusEl.innerHTML = `<div class="message error">⚠️ API Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                console.error('Connection test failed:', error);
+                statusEl.innerHTML = `<div class="message error">❌ Connection Failed: ${error.message}</div>`;
+            }
+        }
+
+        // ========== GAME FUNCTIONS ==========
+        function startPuzzle() {
+            teamName = document.getElementById('teamName').value.trim();
+            teamNo = document.getElementById('teamNo').value.trim();
+
+            if (!teamName || !teamNo) {
+                alert('Please enter Team Name and Team Number');
+                return;
+            }
+
+            document.getElementById('displayTeamName').textContent = teamName;
+            document.getElementById('displayTeamNo').textContent = teamNo;
+
+            buildGrid();
+            buildClues();
+            startTimer();
+            startTime = Date.now();
+            showPage('game');
+        }
+
+        function buildGrid() {
+            const gridEl = document.getElementById('crosswordGrid');
+            gridEl.innerHTML = '';
+            
+            let clueNumber = 1;
+            const clueNumbers = {};
+
+            // Calculate clue numbers
+            for (let r = 0; r < 12; r++) {
+                for (let c = 0; c < 12; c++) {
+                    if (grid[r][c] !== "#") {
+                        const startsAcross = (c === 0 || grid[r][c - 1] === "#") && (c + 1 < 12 && grid[r][c + 1] !== "#");
+                        const startsDown = (r === 0 || grid[r - 1][c] === "#") && (r + 1 < 12 && grid[r + 1][c] !== "#");
+                        
+                        if (startsAcross || startsDown) {
+                            clueNumbers[`${r}-${c}`] = clueNumber++;
+                        }
+                    }
+                }
+            }
+
+            // Build grid
+            for (let r = 0; r < 12; r++) {
+                for (let c = 0; c < 12; c++) {
+                    if (grid[r][c] === "#") {
+                        const block = document.createElement('div');
+                        block.className = 'block';
+                        gridEl.appendChild(block);
+                    } else {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'cell-wrapper';
+
+                        if (clueNumbers[`${r}-${c}`]) {
+                            const numSpan = document.createElement('span');
+                            numSpan.className = 'clue-number';
+                            numSpan.textContent = clueNumbers[`${r}-${c}`];
+                            wrapper.appendChild(numSpan);
+                        }
+
+                        const input = document.createElement('input');
+                        input.className = 'cell';
+                        input.maxLength = 1;
+                        input.dataset.r = r;
+                        input.dataset.c = c;
+                        input.addEventListener('input', (e) => {
+                            e.target.value = e.target.value.toUpperCase();
+                            userAnswers[`${r}-${c}`] = e.target.value;
+                            moveToNext(r, c);
+                        });
+                        
+                        wrapper.appendChild(input);
+                        gridEl.appendChild(wrapper);
+                    }
+                }
+            }
+            
+            // Focus first cell
+            setTimeout(() => {
+                const firstInput = document.querySelector('.cell');
+                if (firstInput) firstInput.focus();
+            }, 100);
+        }
+
+        function moveToNext(r, c) {
+            let nextC = c + 1;
+            while (nextC < 12 && grid[r][nextC] === "#") nextC++;
+            
+            if (nextC < 12) {
+                const nextInput = document.querySelector(`input[data-r="${r}"][data-c="${nextC}"]`);
+                if (nextInput) {
+                    nextInput.focus();
+                    nextInput.select();
+                }
+            }
+        }
+
+        function buildClues() {
+            document.getElementById('acrossClues').innerHTML = clues.across.map(clue => 
+                `<div class="clue"><span class="clue-num">${clue.num}.</span> ${clue.clue}</div>`
+            ).join('');
+
+            document.getElementById('downClues').innerHTML = clues.down.map(clue => 
+                `<div class="clue"><span class="clue-num">${clue.num}.</span> ${clue.clue}</div>`
+            ).join('');
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 20 * 60;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const m = Math.floor(timeLeft / 60);
+                const s = timeLeft % 60;
+                const timerEl = document.getElementById('timer');
+                timerEl.textContent = `${m}:${String(s).padStart(2, '0')}`;
+                
+                if (timeLeft < 60 && !timerEl.classList.contains('warning')) {
+                    timerEl.classList.add('warning');
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up! Auto-submitting...');
+                    submitPuzzle();
+                }
+            }, 1000);
+        }
+
+        function getTimeSpent() {
+            if (!startTime) return '00:00';
+            const timeElapsed = Date.now() - startTime;
+            const minutes = Math.floor(timeElapsed / 60000);
+            const seconds = Math.floor((timeElapsed % 60000) / 1000);
+            return `${minutes}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // ========== SUBMISSION ==========
+        async function submitPuzzle() {
+            console.log('Starting submission...');
+            clearInterval(timerInterval);
+            
+            // Calculate score
+            let correctWords = 0;
+            wordAnswers.forEach(word => {
+                let formed = "";
+                for (let i = 0; i < word.a.length; i++) {
+                    const rr = word.r + (word.d === "D" ? i : 0);
+                    const cc = word.c + (word.d === "A" ? i : 0);
+                    const key = `${rr}-${cc}`;
+                    formed += (userAnswers[key] || "").toUpperCase();
+                }
+                if (formed === word.a) correctWords++;
+            });
+
+            const totalWords = wordAnswers.length;
+            const percentage = Math.round((correctWords / totalWords) * 100);
+            const timeSpent = getTimeSpent();
+
+            console.log('Score calculated:', { correctWords, totalWords, percentage, timeSpent });
+
+            // Show loading
+            showMessage('submitStatus', 'Submitting your answers...', 'info');
+            const submitBtn = document.querySelector('#gamePage .btn-primary');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+            }
+
+            try {
+                console.log('Submitting to:', API_BASE_URL + '/submit');
+                
+                const response = await fetch(API_BASE_URL + '/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        teamName,
+                        teamNo,
+                        score: correctWords,
+                        totalWords,
+                        percentage,
+                        answers: userAnswers,
+                        timeSpent
+                    })
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (data.success) {
+                    // Also save to localStorage as backup
+                    localStorageBackup.push({
+                        teamName,
+                        teamNo,
+                        score: correctWords,
+                        totalWords,
+                        percentage,
+                        timeSpent,
+                        timestamp: new Date().toISOString(),
+                        source: 'local-backup'
+                    });
+                    localStorage.setItem('crosswordResults', JSON.stringify(localStorageBackup));
+                    
+                    document.getElementById('successTeamName').textContent = teamName;
+                    document.getElementById('successMessage').textContent = 
+                        data.savedToDatabase 
+                            ? '✅ Your answers have been saved to the database!' 
+                            : '📝 Your answers have been saved locally.';
+                    
+                    showPage('success');
+                } else {
+                    throw new Error(data.message || 'Submission failed');
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                
+                // Fallback to localStorage
+                localStorageBackup.push({
+                    teamName,
+                    teamNo,
+                    score: correctWords,
+                    totalWords,
+                    percentage,
+                    timeSpent,
+                    timestamp: new Date().toISOString(),
+                    source: 'local-fallback'
+                });
+                localStorage.setItem('crosswordResults', JSON.stringify(localStorageBackup));
+                
+                document.getElementById('successTeamName').textContent = teamName;
+                document.getElementById('successMessage').textContent = 
+                    '📱 Your answers have been saved locally (offline mode).';
+                
+                showPage('success');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Puzzle';
+                }
+            }
+        }
+
+        // ========== ADMIN FUNCTIONS ==========
+        async function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            showMessage('loginMessage', 'Logging in...', 'info');
+
+            try {
+                const response = await fetch(API_BASE_URL + '/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                console.log('Login response:', data);
+
+                if (data.success) {
+                    showMessage('loginMessage', '✅ Login successful!', 'success');
+                    setTimeout(() => {
+                        showPage('admin');
+                        loadResults();
+                    }, 1000);
+                } else {
+                    showMessage('loginMessage', `❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('loginMessage', '❌ Network error. Try local credentials.', 'error');
+                
+                // Fallback to local check
+                if (username === 'admin' && password === 'medha2025') {
+                    setTimeout(() => {
+                        showPage('admin');
+                        loadResults();
+                    }, 1000);
+                }
+            }
+        }
+
+        function adminLogout() {
+            document.getElementById('adminUsername').value = 'admin';
+            document.getElementById('adminPassword').value = 'medha2025';
+            showPage('adminLogin');
+        }
+
+        async function loadResults() {
+            const resultsEl = document.getElementById('resultsContent');
+            resultsEl.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading results...</p></div>';
+
+            try {
+                const response = await fetch(API_BASE_URL + '/results');
+                const data = await response.json();
+                console.log('Results loaded:', data);
+
+                let results = data.results || [];
+                let source = data.source || 'api';
+
+                // Combine with localStorage backup
+                if (localStorageBackup.length > 0) {
+                    results = [...results, ...localStorageBackup];
+                    source = 'combined';
+                }
+
+                displayResults(results, source, resultsEl);
+            } catch (error) {
+                console.error('Error loading results:', error);
+                // Fallback to localStorage
+                displayResults(localStorageBackup, 'localStorage', resultsEl);
+            }
+        }
+
+        function displayResults(results, source, container) {
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:40px; color:#999;">
+                        <div style="font-size:64px; opacity:0.3;">🏆</div>
+                        <p style="font-size:20px;">No submissions yet</p>
+                        <p><small>Source: ${source}</small></p>
+                    </div>`;
+                return;
+            }
+
+            // Sort by score
+            const sorted = results.sort((a, b) => b.score - a.score || new Date(a.timestamp) - new Date(b.timestamp));
+            
+            let html = `
+                <p style="font-size:16px; color:#666; margin-bottom:20px;">
+                    📊 Total Submissions: <strong>${sorted.length}</strong> | 
+                    Source: <strong>${source}</strong>
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Team Name</th>
+                            <th>Team #</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Time Spent</th>
+                            <th>Submitted At</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            sorted.forEach((result, index) => {
+                const rank = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1);
+                const badgeClass = result.percentage >= 80 ? 'badge-green' : 
+                                 result.percentage >= 60 ? 'badge-blue' : 
+                                 result.percentage >= 40 ? 'badge-yellow' : 'badge-red';
+                
+                html += `
+                    <tr>
+                        <td class="rank-cell">${rank}</td>
+                        <td><strong>${result.teamName}</strong></td>
+                        <td>${result.teamNo || '-'}</td>
+                        <td><strong>${result.score} / ${result.totalWords || wordAnswers.length}</strong></td>
+                        <td><span class="badge ${badgeClass}">${result.percentage}%</span></td>
+                        <td>${result.timeSpent || 'N/A'}</td>
+                        <td>${new Date(result.timestamp).toLocaleString()}</td>
+                    </tr>`;
+            });
+            
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        // Initialize
+        console.log('Medha Crossword loaded. API Base:', API_BASE_URL);
+        console.log('Local storage backup count:', localStorageBackup.length);
+    </script>
+</body>
+</html>
