@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medha Crossword - Offline Version</title>
+    <!-- COPY ALL THE CSS FROM PREVIOUS CODE HERE -->
+    <style>
+        /* PASTE ALL CSS STYLES HERE */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh; padding: 20px; }
+        /* ... ALL OTHER STYLES ... */
+    </style>
+</head>
+<body>
+    <!-- COPY ALL HTML FROM PREVIOUS CODE HERE -->
+    <div id="homePage" class="container">
+        <!-- ... ALL HTML CONTENT ... -->
+    </div>
+    
+    <script>
+        // SIMPLIFIED JAVASCRIPT - NO API NEEDED
+        const grid = [ /* SAME GRID DATA */ ];
+        const wordAnswers = [ /* SAME WORD ANSWERS */ ];
+        const clues = { /* SAME CLUES */ };
+        
+        let timeLeft = 20 * 60;
+        let timerInterval = null;
+        let teamName = '';
+        let teamNo = '';
+        let userAnswers = {};
+        let startTime = null;
+        
+        // Simple showPage function
+        function showPage(page) {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('gamePage').classList.add('hidden');
+            document.getElementById('successPage').classList.add('hidden');
+            document.getElementById('adminLoginPage').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            
+            document.getElementById(page + 'Page').classList.remove('hidden');
+            
+            if (page === 'game') startTime = Date.now();
+            if (page === 'admin') loadLocalResults();
+        }
+        
+        // Simple submit function
+        function submitPuzzle() {
+            clearInterval(timerInterval);
+            
+            let correctWords = 0;
+            wordAnswers.forEach(word => {
+                let formed = "";
+                for (let i = 0; i < word.a.length; i++) {
+                    const rr = word.r + (word.d === "D" ? i : 0);
+                    const cc = word.c + (word.d === "A" ? i : 0);
+                    const key = `${rr}-${cc}`;
+                    formed += (userAnswers[key] || "").toUpperCase();
+                }
+                if (formed === word.a) correctWords++;
+            });
+            
+            const totalWords = wordAnswers.length;
+            const percentage = Math.round((correctWords / totalWords) * 100);
+            
+            // Save locally
+            const results = JSON.parse(localStorage.getItem('crosswordResults') || '[]');
+            results.push({
+                teamName,
+                teamNo,
+                score: correctWords,
+                totalWords,
+                percentage,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('crosswordResults', JSON.stringify(results));
+            
+            document.getElementById('successTeamName').textContent = teamName;
+            document.getElementById('successMessage').innerHTML = 
+                `✅ <strong>Score: ${correctWords}/${totalWords} (${percentage}%)</strong><br>
+                 Data saved in your browser.`;
+            
+            showPage('success');
+        }
+        
+        // Simple admin login
+        function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            if (username === 'admin' && password === 'medha2025') {
+                showPage('admin');
+            } else {
+                alert('Use admin / medha2025');
+            }
+        }
+        
+        // Load local results
+        function loadLocalResults() {
+            const resultsEl = document.getElementById('resultsContent');
+            const results = JSON.parse(localStorage.getItem('crosswordResults') || '[]');
+            
+            if (results.length === 0) {
+                resultsEl.innerHTML = '<p>No submissions yet.</p>';
+                return;
+            }
+            
+            const sorted = results.sort((a, b) => b.score - a.score);
+            let html = `<h3>${sorted.length} Submissions (Local Storage)</h3><table>`;
+            
+            sorted.forEach((r, i) => {
+                html += `<tr>
+                    <td>${i+1}</td>
+                    <td>${r.teamName}</td>
+                    <td>${r.teamNo}</td>
+                    <td>${r.score}/${r.totalWords}</td>
+                    <td>${r.percentage}%</td>
+                </tr>`;
+            });
+            
+            html += '</table>';
+            resultsEl.innerHTML = html;
+        }
+        
+        // KEEP ALL OTHER FUNCTIONS THE SAME:
+        // startPuzzle(), buildGrid(), buildClues(), startTimer(), etc.
+        // ... (copy all your existing game functions)
+        
+    </script>
+</body>
+</html>
