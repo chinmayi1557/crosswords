@@ -1,0 +1,9 @@
+{
+  "name": "crosswordsmedha",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "mongodb": "^5.7.0",
+    "bcryptjs": "^2.4.3"
+  }
+}
